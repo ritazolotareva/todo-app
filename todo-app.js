@@ -1,12 +1,17 @@
+// array is for function to save data of task list 
 let tasksList = [];
+// this variable is for to keep information in every html page
 let listName = '';
 
+// function that will be used to render title on pages later (in createTodoApp())
 function createAppTitle(title) {
     let appTitle = document.createElement('h2');
     appTitle.innerHTML = title;
     return appTitle;
 }
 
+// creating html elements and adding classes to them to render them on pages 
+// there are input form, buttons, div
 function createTodoItemForm() {
     let form = document.createElement('form');
     let input = document.createElement('input');
@@ -19,12 +24,14 @@ function createTodoItemForm() {
     buttonWrapper.classList.add('input-group-append');
     button.classList.add('btn', 'btn-primary');
     button.textContent = 'Add item';
+// disabling the main button by default
     button.disabled = true;
 
     buttonWrapper.append(button);
     form.append(input);
     form.append(buttonWrapper);
 
+// condition that enable the main button 'Add item' while the input is not empty
     input.addEventListener('input', function () {
         if (input.value !== '') {
             button.disabled = false;
@@ -38,12 +45,16 @@ function createTodoItemForm() {
     }
 }
 
+// function that creates list of tasks will be used later in createTodoApp to append list on html page
 function createTodoList() {
     let list = document.createElement('ul');
     list.classList.add('list-group');
     return list;
 }
 
+// creating html elements with added css classes
+// the function creates task item with name and two buttons (done & delete)
+// here also uses a function saves data to LocalStorage
 function createTodoItem(obj) {
     let item = document.createElement('li');
     let buttonGroup = document.createElement('div')
@@ -58,6 +69,7 @@ function createTodoItem(obj) {
     deleteButton.classList.add('btn', 'btn-danger');
     deleteButton.textContent = 'Delete';
 
+    // this condition change status of obj's property
     if (obj.done == true) item.classList.add('list-group-item-success');
 
     doneButton.addEventListener('click', function () {
@@ -69,6 +81,7 @@ function createTodoItem(obj) {
         }
         saveToLocalStorage(tasksList, listName);
     });
+
     deleteButton.addEventListener('click', function () {
         if (confirm('Are you sure?')) {
             item.remove();
@@ -90,6 +103,7 @@ function createTodoItem(obj) {
     }
 }
 
+// setting todo app on html page itself with everything: title, todo form (input field and 'add' button), and etc.
 function createTodoApp(container, title = 'To Do List', keyName) {
     let todoAppTitle = createAppTitle(title);
     let todoItemForm = createTodoItemForm();
@@ -100,6 +114,7 @@ function createTodoApp(container, title = 'To Do List', keyName) {
     container.append(todoItemForm.form);
     container.append(todoList);
 
+    // rendering data from LocalStorage on page
     let localData = localStorage.getItem(listName);
     if (localData !== null && localData !== '') tasksList = JSON.parse(localData)
     for (const itemList of tasksList) {
@@ -107,28 +122,33 @@ function createTodoApp(container, title = 'To Do List', keyName) {
         todoList.append(todoItem.item);
     }
 
+    // event 'submit' allows to confirm text in input without clicking the 'add' button on page, but just with tabbing the enter
+    // function(e) stops automatic page relode
     todoItemForm.form.addEventListener('submit', function (e) {
         e.preventDefault();
         if (!todoItemForm.input.value) {
             return;
         }
 
+        // adding properties in object of every item in the task list to identify it
         let newItem = {
             id: getNewID(tasksList),
             name: todoItemForm.input.value,
             done: false,
         } 
-
         let todoItem = createTodoItem(newItem);
 
         tasksList.push(newItem);
         saveToLocalStorage(tasksList, listName);
 
+        // first adding task in the list
         todoList.append(todoItem.item);
         todoItemForm.button.disabled = true;
+        // to empty input after adding a task
         todoItemForm.input.value = '';
     });
 }
+
 
 function getNewID(arr) {
     let max = 0;
@@ -142,11 +162,6 @@ function getNewID(arr) {
 
 function saveToLocalStorage(arr, keyName) {
     localStorage.setItem(keyName, JSON.stringify(arr))
-}
-
-function renderFromLocalStorage(arr) {
-    let list = localStorage.getItem('dataList');
-    JSON.parse(list);
 }
 
 
